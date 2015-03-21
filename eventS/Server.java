@@ -9,7 +9,6 @@ package eventS;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 class Token {
 	private double arrivalTick;
