@@ -241,7 +241,7 @@ final class EventList {
 		eventList.add(e);
 	}
 	//Reagenda um evento (ou agenda-o, se ainda não tiver sido agendado).
-	public boolean reschedule(Event e, double time) {
+	public boolean reschedule(Event e, double time) {	
 		boolean bool = eventList.remove(e);
 		e.time(time);
 		eventList.add(e);
@@ -287,11 +287,12 @@ final class Simulator {
     public final void run() {
         model.init();
         while (! events.empty()) {
-                Event event = events.pop();
-                double curr = event.time();
-                assert (curr >= clock): "Simulation.run, time error. " + curr + " > " + clock;
-                clock = curr;
-                event.execute();
-        }
+        	Event event = events.pop();
+        	System.out.println(event);
+            double curr = event.time();
+            assert (curr >= clock): "Simulation.run, time error. " + curr + " > " + clock;
+            clock = curr;
+            event.execute();
+        }		
     }   
 }       

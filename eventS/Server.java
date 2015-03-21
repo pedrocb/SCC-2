@@ -9,6 +9,7 @@ package eventS;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 class Token {
 	private double arrivalTick;
@@ -58,7 +59,6 @@ final class Departure extends Event {
 	private Token client = null;
 	@Override
 	public void execute() {
-		System.out.format("%.2f\t%.2f\t%.2f\n", client.arrivalTick(), client.serviceTick(), time);
 		if (model.queue.value() > 0) {
 			model.queue.inc(-1, time);
 			client = model.line.remove(0);
@@ -89,16 +89,22 @@ final class Stop extends Event {
 }
 
 final class Server extends Model {
+	final Accumulate tamfilaHotFood;
 	final Accumulate queue;
+	final Accumulate atendidoHotFood;
 	final Accumulate rest;
 	final RandomStream service;
 	final RandomStream arrival;
+	final List<Token> filaHotfood;
 	final List<Token> line;
 	final Average delayTime;
 	public Server(int n) {
 		super();
+		this.tamfilaHotFood = new Accumulate(0);
 		this.queue = new Accumulate(0);
+		this.atendidoHotFood = new Accumulate(0);
 		this.rest = new Accumulate(n);
+		this.filaHotfood = new ArrayList<>();
 		this.line = new ArrayList<>();
 		this.delayTime = new Average();
 		double[] A = new double[]{0.4, 1.2, 0.5, 1.7, 0.2, 1.6, 0.2, 1.4, 1.9, 2.7, 0.5};
@@ -107,9 +113,9 @@ final class Server extends Model {
 		service = new Sequence(S);
 	}
 	@Override
-	protected void init() {
-		schedule(new Arrival(this), arrival.next());
-		schedule(new Stop(this), 9);
+	protected void init() {				
+		schedule(new GeraTokens(this),0);
+		schedule(new Stop(this),5400);
 	}
 	@Override
 	public String toString() {return "" + queue.value() + " " + rest.value();}
