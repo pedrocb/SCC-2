@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Token {
+	private Accumulate cashiertime;
 	private double arrivalTick;
 	private double serviceTick;
 	private double endTick;
@@ -23,11 +24,14 @@ class Token {
 	public double serviceTick() {return serviceTick;}
 	public void serviceTick(double serviceTick) {this.serviceTick = serviceTick;}
 	public void endTick(double endTick) {this.endTick = endTick;}
+	public void addcashiertime(int n,double time){
+		cashiertime.set(n,time);
+	}
 	@Override
 	public String toString() {return String.format("[%.2f]", arrivalTick);}
 }
 
-final class Arrival extends Event {
+/*final class Arrival extends Event {
 	private final Server model;
 	public Arrival(Server model) {
 		super();
@@ -47,8 +51,8 @@ final class Arrival extends Event {
 		model.schedule(this, model.arrival.next());
 	}
 }
-
-final class Departure extends Event {
+*/
+/*final class Departure extends Event {
 	private final Server model;
 	public Departure(Server model, Token client) {
 		super();
@@ -69,7 +73,7 @@ final class Departure extends Event {
 			model.rest.inc(1, time);
 		}
 	}
-}
+}*/
 
 final class Stop extends Event {
 	private final Server model;
@@ -79,43 +83,46 @@ final class Stop extends Event {
 	}
 	@Override
 	public void execute() {
-		System.out.format("%.2f\t%.2f\t%.2f\n",
-			model.queue.mean(time),
-			model.rest.mean(time), model.delayTime.mean()
-		);
 		model.clear();
 	}
 }
 
 final class Server extends Model {
-	final Accumulate tamfilaHotFood;
-	final Accumulate queue;
-	final Accumulate atendidoHotFood;
-	final Accumulate rest;
-	final RandomStream service;
-	final RandomStream arrival;
-	final List<Token> filaHotfood;
-	final List<Token> line;
+	final Fila hotFood;
+	final Fila sandes;
+	final Accumulate tamfilaCaixa;
+	final Accumulate atendidoCaixa;
+	final List<Token> filaCaixa;
+	final Accumulate tamfilaBebida;
+	final Accumulate atendidoBebida;
+	final List<Token> filaBebida;
 	final Average delayTime;
 	public Server(int n) {
 		super();
-		this.tamfilaHotFood = new Accumulate(0);
-		this.queue = new Accumulate(0);
-		this.atendidoHotFood = new Accumulate(0);
-		this.rest = new Accumulate(n);
-		this.filaHotfood = new ArrayList<>();
-		this.line = new ArrayList<>();
+		hotFood = new Fila(new Accumulate(0),new Accumulate(n));
 		this.delayTime = new Average();
-		double[] A = new double[]{0.4, 1.2, 0.5, 1.7, 0.2, 1.6, 0.2, 1.4, 1.9, 2.7, 0.5};
-		double[] S = new double[]{2.0, 0.7, 0.2, 1.1, 3.7, 0.6, 0.9, 1.3, 1.1, 1.8, 0.8};
-		arrival = new Sequence(A);
-		service = new Sequence(S);
+		sandes = new Fila(new Accumulate(0),new Accumulate(n));
+		this.tamfilaCaixa = new Accumulate(0);
+		this.atendidoCaixa = new Accumulate(n);
+		this.filaCaixa = new ArrayList<>();
+		this.tamfilaBebida = new Accumulate(0);
+		this.atendidoBebida = new Accumulate(n);
+		this.filaBebida = new ArrayList<>();
 	}
 	@Override
 	protected void init() {				
 		schedule(new GeraTokens(this),0);
 		schedule(new Stop(this),5400);
 	}
-	@Override
-	public String toString() {return "" + queue.value() + " " + rest.value();}
+}
+
+final class Fila{
+	Accumulate tamFila;
+	Accumulate atendido;
+	List<Token> fila;
+	public Fila(Accumulate tamFila,Accumulate atendido){
+		this.tamFila = tamFila;
+		this.atendido = atendido;
+		fila = new ArrayList<>();
+	}
 }

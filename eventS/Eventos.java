@@ -9,49 +9,13 @@ class ChegadaHotFood extends Event{
 	}
 	public void execute(){
 		Token client = new Token(time);
-		if (model.atendidoHotFood.value() > 0) {
-			model.atendidoHotFood.inc(-1, time);
-			model.schedule(new SaidaHotFood(model, client), model.service.next());
+		if (model.hotFood.atendido.value() > 0) {
+			model.hotFood.atendido.inc(-1, time);
+			model.schedule(new SaidaHotFood(model, client), new Uniform(new Random().nextInt(),50.0,120.0).next());
 		}
 		else {
-			model.queue.inc(1, time);
-			model.line.add(client);
-		}
-	}
-}
-
-class ChegadaSandes extends Event{
-	private final Server model;
-	public ChegadaSandes(Server model){
-		this.model = model;
-	}
-	public void execute(){
-		Token client = new Token(time);
-		if (model.atendidoHotFood.value() > 0) {
-			model.atendidoHotFood.inc(-1, time);
-			model.schedule(new SaidaHotFood(model, client), model.service.next());
-		}
-		else {
-			model.queue.inc(1, time);
-			model.line.add(client);
-		}
-	}
-}
-
-class ChegadaBebidas extends Event{
-	private final Server model;
-	public ChegadaBebidas(Server model){
-		this.model = model;
-	}
-	public void execute(){
-		Token client = new Token(time);
-		if (model.atendidoHotFood.value() > 0) {
-			model.atendidoHotFood.inc(-1, time);
-			model.schedule(new SaidaHotFood(model, client), model.service.next());
-		}
-		else {
-			model.queue.inc(1, time);
-			model.line.add(client);
+			model.hotFood.tamFila.inc(1, time);
+			model.hotFood.fila.add(client);
 		}
 	}
 }
@@ -67,16 +31,99 @@ class SaidaHotFood extends Event{
 	@Override
 	public void execute() {
 		System.out.format("Saiu %.2f\t%.2f\t%.2f\n", client.arrivalTick(), client.serviceTick(), time);
-		if (model.queue.value() > 0) {
-			model.queue.inc(-1, time);
-			client = model.line.remove(0);
+		if (model.hotFood.atendido.value() > 0) {
+			model.hotFood.tamFila.inc(-1, time);
+			client = model.hotFood.fila.remove(0);
 			client.serviceTick(time);
 			model.delayTime.add(client.waitTime());
-			model.schedule(this, model.service.next());
+			model.schedule(this, new Uniform(new Random().nextInt(),50.0,120.0).next());
 		}
 		else {
-			model.rest.inc(1, time);
+			model.hotFood.atendido.inc(1, time);
 		}
+	}
+}
+
+class ChegadaSandes extends Event{
+	private final Server model;
+	public ChegadaSandes(Server model){
+		this.model = model;
+	}
+	public void execute(){
+		Token client = new Token(time);
+		if (model.sandes.atendido.value() > 0) {
+			model.sandes.atendido.inc(-1, time);
+			model.schedule(new SaidaSandes(model, client), new Uniform(new Random().nextInt(),60.0,180.0).next());
+		}
+		else {
+			model.sandes.tamFila.inc(1, time);
+			model.sandes.fila.add(client);
+		}
+	}
+}
+
+class SaidaSandes extends Event{
+	private final Server model;
+	public SaidaSandes(Server model, Token client) {
+		super();
+		this.model = model;
+		this.client = client;
+	}
+	private Token client = null;
+	@Override
+	public void execute() {
+		if (model.sandes.tamFila.value() > 0) {
+			model.sandes.tamFila.inc(-1, time);
+			client = model.sandes.fila.remove(0);
+			client.serviceTick(time);
+			model.delayTime.add(client.waitTime());
+			model.schedule(this, new Uniform(new Random().nextInt(),60.0,180.0).next());
+		}
+		else {
+			model.sandes.atendido.inc(1, time);
+		}
+		System.out.println(model.sandes.tamFila.value());
+	}
+}
+
+class ChegadaBebidas extends Event{
+	private final Server model;
+	public ChegadaBebidas(Server model){
+		this.model = model;
+	}
+	public void execute(){
+		Token client = new Token(time);
+		if (model.atendidoBebida.value() > 0) {
+			model.atendidoBebida.inc(-1, time);
+			model.schedule(new SaidaBebida(model, client), new Uniform(new Random().nextInt(),5.0,20.0).next());
+		}
+		else {
+		}
+	}
+}
+
+class SaidaBebida extends Event{
+	private final Server model;
+	public SaidaBebida(Server model, Token client) {
+		super();
+		this.model = model;
+		this.client = client;
+	}
+	private Token client = null;
+	@Override
+	public void execute() {
+		System.out.format("Saiu %.2f\t%.2f\t%.2f\n", client.arrivalTick(), client.serviceTick(), time);
+		if (model.tamfilaBebida.value() > 0) {
+			model.tamfilaBebida.inc(-1, time);
+			client = model.filaBebida.remove(0);
+			client.serviceTick(time);
+			model.delayTime.add(client.waitTime());
+			model.schedule(this, new Uniform(new Random().nextInt(),5.0,20.0).next());
+		}
+		else {
+			model.atendidoBebida.inc(1, time);
+		}
+		System.out.println(model.tamfilaBebida.value());
 	}
 }
 
