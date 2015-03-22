@@ -172,7 +172,7 @@ final class Server7 extends Server {
 		super();
 		hotFood = new Fila(new Accumulate(0),new Accumulate(1));
 		sandes = new Fila(new Accumulate(0),new Accumulate(2));
-		caixa = new Fila[2];
+		caixa = new Fila[3];
 		caixa[0] = new Fila(new Accumulate(0),new Accumulate(1));
 		caixa[1] = new Fila(new Accumulate(0),new Accumulate(1));
 		caixa[2] = new Fila(new Accumulate(0),new Accumulate(1));
