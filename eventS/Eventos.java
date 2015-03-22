@@ -4,8 +4,10 @@ import java.util.Random;
 
 class ChegadaHotFood extends Event{
 	private final Server model;
-	public ChegadaHotFood(Server model){
+	private Token pessoa;
+	public ChegadaHotFood(Server model,Token pessoa){
 		this.model = model;
+		this.pessoa = pessoa;
 	}
 	public void execute(){
 		Token client = new Token(time);
@@ -22,20 +24,19 @@ class ChegadaHotFood extends Event{
 
 class SaidaHotFood extends Event{
 	private final Server model;
-	public SaidaHotFood(Server model, Token client) {
+	private Token pessoa;
+	public SaidaHotFood(Server model, Token pessoa) {
 		super();
 		this.model = model;
-		this.client = client;
+		this.pessoa = pessoa;
 	}
-	private Token client = null;
 	@Override
 	public void execute() {
-		System.out.format("Saiu %.2f\t%.2f\t%.2f\n", client.arrivalTick(), client.serviceTick(), time);
 		if (model.hotFood.atendido.value() > 0) {
 			model.hotFood.tamFila.inc(-1, time);
-			client = model.hotFood.fila.remove(0);
-			client.serviceTick(time);
-			model.delayTime.add(client.waitTime());
+			pessoa = model.hotFood.fila.remove(0);
+			pessoa.serviceTick(time);
+			model.delayTime.add(pessoa.waitTime());
 			model.schedule(this, new Uniform(new Random().nextInt(),50.0,120.0).next());
 		}
 		else {
@@ -46,8 +47,10 @@ class SaidaHotFood extends Event{
 
 class ChegadaSandes extends Event{
 	private final Server model;
-	public ChegadaSandes(Server model){
+	private Token pessoa;
+	public ChegadaSandes(Server model,Token pessoa){
 		this.model = model;
+		this.pessoa = pessoa;
 	}
 	public void execute(){
 		Token client = new Token(time);
@@ -64,6 +67,7 @@ class ChegadaSandes extends Event{
 
 class SaidaSandes extends Event{
 	private final Server model;
+	private Token pessoa;
 	public SaidaSandes(Server model, Token client) {
 		super();
 		this.model = model;
@@ -82,42 +86,40 @@ class SaidaSandes extends Event{
 		else {
 			model.sandes.atendido.inc(1, time);
 		}
-		System.out.println(model.sandes.tamFila.value());
 	}
 }
 
 class ChegadaBebidas extends Event{
 	private final Server model;
-	public ChegadaBebidas(Server model){
+	private Token pessoa;
+	public ChegadaBebidas(Server model,Token pessoa){
 		this.model = model;
+		this.pessoa = pessoa;
 	}
 	public void execute(){
-		Token client = new Token(time);
-		if (model.atendidoBebida.value() > 0) {
-			model.atendidoBebida.inc(-1, time);
-			model.schedule(new SaidaBebida(model, client), new Uniform(new Random().nextInt(),5.0,20.0).next());
-		}
-		else {
-		}
+		model.atendidoBebida.inc(-1, time);
+		//model.schedule(new ChegadaCaixa(model, pessoa), new Uniform(new Random().nextInt(),5.0,20.0).next());
 	}
 }
 
-class SaidaBebida extends Event{
+
+
+/*class SaidaBebida extends Event{
 	private final Server model;
-	public SaidaBebida(Server model, Token client) {
+	private Token pessoa;
+	public SaidaBebida(Server model, Token pessoa) {
 		super();
 		this.model = model;
-		this.client = client;
+		this.pessoa = pessoa;
 	}
-	private Token client = null;
 	@Override
 	public void execute() {
-		System.out.format("Saiu %.2f\t%.2f\t%.2f\n", client.arrivalTick(), client.serviceTick(), time);
+		System.out.format("Saiu %.2f\t%.2f\t%.2f\n", pessoa.arrivalTick(), pessoa.serviceTick(), time);
 		if (model.tamfilaBebida.value() > 0) {
 			model.tamfilaBebida.inc(-1, time);
-			client = model.filaBebida.remove(0);
-			client.serviceTick(time);
-			model.delayTime.add(client.waitTime());
+			pessoa = model.filaBebida.remove(0);
+			pessoa.serviceTick(time);
+			model.delayTime.add(pessoa.waitTime());
 			model.schedule(this, new Uniform(new Random().nextInt(),5.0,20.0).next());
 		}
 		else {
@@ -125,7 +127,7 @@ class SaidaBebida extends Event{
 		}
 		System.out.println(model.tamfilaBebida.value());
 	}
-}
+}*/
 
 class GeraTokens extends Event{
 	private final Server model;
@@ -139,15 +141,16 @@ class GeraTokens extends Event{
 		double values1[] = {0,1,2}; 
 		int n = (int)new Discrete(new Random().nextInt(),values,prob).next();
 		for(int i=0;i<n;i++){
+			Token pessoa = new Token(time);
 			int nn = (int)new Discrete(new Random().nextInt(),values1,prob1).next();
 			if(nn==0){
-				model.schedule(new ChegadaHotFood(model),0);
+				model.schedule(new ChegadaHotFood(model,pessoa),0);
 			}
 			else if(nn==1){
-				model.schedule(new ChegadaSandes(model),0);
+				model.schedule(new ChegadaSandes(model,pessoa),0);
 			}
 			else{
-				model.schedule(new ChegadaBebidas(model), 0);
+				model.schedule(new ChegadaBebidas(model,pessoa), 0);
 			}
 		}
 		model.schedule(new GeraTokens(model),new Exponential(new Random().nextInt(),30).next());
