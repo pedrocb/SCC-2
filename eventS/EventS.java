@@ -131,12 +131,17 @@ class Accumulate {
 class Average {
 	private double sum;
 	private int count;
+	private double max;
 	public Average() {clear();}
 	//Calcula a média do valor incrementado em cada operação efetuada.
 	public double mean() {return sum / count;}
 	//Adiciona value à soma interna e incrementa o número de adições efetuadas.
 	public void add(double value) {
 		sum += value;
+		if(value>max);
+		{
+			max=value;
+		}
 		++count;
 	}
 	//getter da variável count.
@@ -145,6 +150,10 @@ class Average {
 	public final void clear() {
 		sum = 0.0;
 		count = 0;
+	}
+	public double maximum()
+	{
+		return max;
 	}
 	@Override
 	//Devolve uma string com o valor médio dos incrementos e o número de operações efetuadas.
@@ -204,6 +213,21 @@ abstract class Event implements Comparable<Event> {
 //Modelo de execução do simulador.
 abstract class Model {
 	private Simulator simulator;
+	Fila hotFood;
+	Fila sandes;
+	Fila[] caixa;
+	Accumulate npessoas;
+	int maxhotfoodqueue;
+	int maxsandesqueue;
+	int maxcashier0queue;
+	int maxcashier1queue;
+	int maxcashier2queue;
+	public Average hotfooddelay;
+	Average sandesdelay;
+	Average cashierdelay;
+	int pessoasmax;
+	Average delaytipo[];
+	
 	protected void simulator(Simulator simulator) {this.simulator = simulator;}
 	public Model() {}
 	//Têm que implementar nas sub-classes, é a função de inicialização do modelo.
@@ -288,11 +312,17 @@ final class Simulator {
         model.init();
         while (! events.empty()) {
         	Event event = events.pop();
-        	System.out.println(event);
+        	//System.out.println(event);
             double curr = event.time();
             assert (curr >= clock): "Simulation.run, time error. " + curr + " > " + clock;
             clock = curr;
             event.execute();
-        }		
+           // System.out.println("N� pessoas em simula��o:"+model.npessoas.value());
+
+        }
+        System.out.println("Max pessoas:"+model.pessoasmax+"\nMedia pessoas:"+model.npessoas.mean(clock) + "\nMedia atraso Hot Food:" + model.hotfooddelay.mean() + "\nMedia atraso sandes:" + model.sandesdelay.mean() + "\nMedia atraso caixas:" + model.cashierdelay.mean()+"\nM�ximo atraso hot food:"+model.hotfooddelay.maximum() + "\nM�ximo atraso sandes:" + model.sandesdelay.maximum() + "\nM�ximo atraso caixas:" + model.cashierdelay.maximum());
+        System.out.println("Max pessoas hot food:"+model.maxhotfoodqueue+"\nMax pessoas sandes:"+model.maxsandesqueue+"\nMax pessoas caixa[0]:"+model.maxcashier0queue+"\nMax pessoas caixa[1]:"+model.maxcashier1queue+"\nMax pessoas caixa[2]:"+model.maxcashier2queue);
+        System.out.println("Atraso de pessoas do tipo 1 " + model.delaytipo[0].mean() + "\nAtraso de pessoas do tipo 2 " + model.delaytipo[1].mean()+"\nAtraso de pessoas do tipo 3 " + model.delaytipo[2].mean());
+        System.out.println("Max atraso pessoa1 "+model.delaytipo[0].maximum() +  "\nMax atraso pessoa2 "+model.delaytipo[1].maximum()+"\nMax atraso pessoa3 "+model.delaytipo[2].maximum());
     }   
 }       
