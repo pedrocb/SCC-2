@@ -15,7 +15,8 @@ class Token {
 	private double arrivalTick;
 	private double serviceTick;
 	private double endTick;
-	public Token(double arrivalTick) {this.arrivalTick = this.serviceTick = arrivalTick;}
+	public Token(double arrivalTick) {this.arrivalTick = this.serviceTick = arrivalTick;
+		cashiertime = new Accumulate(0);}
 	public double waitTime() {return serviceTick - arrivalTick;}
 	public double cycleTime(double time) {return time - arrivalTick;}
 	public double cycleTime() {return endTick - arrivalTick;}
@@ -24,8 +25,9 @@ class Token {
 	public double serviceTick() {return serviceTick;}
 	public void serviceTick(double serviceTick) {this.serviceTick = serviceTick;}
 	public void endTick(double endTick) {this.endTick = endTick;}
+	public int cashiertime() {return cashiertime.value();}
 	public void addcashiertime(int n,double time){
-		cashiertime.set(n,time);
+		cashiertime.inc(n,time);
 	}
 	@Override
 	public String toString() {return String.format("[%.2f]", arrivalTick);}
@@ -86,36 +88,97 @@ final class Stop extends Event {
 		model.clear();
 	}
 }
-
-final class Server extends Model {
+//Model base
+public class Server extends Model {
 	final Fila hotFood;
 	final Fila sandes;
-	final Accumulate tamfilaCaixa;
-	final Accumulate atendidoCaixa;
-	final List<Token> filaCaixa;
-	final Accumulate tamfilaBebida;
-	final Accumulate atendidoBebida;
-	final List<Token> filaBebida;
-	final Average delayTime;
-	public Server(int n) {
+	final Fila[] caixa;
+	public Server() {
 		super();
-		hotFood = new Fila(new Accumulate(0),new Accumulate(n));
-		this.delayTime = new Average();
-		sandes = new Fila(new Accumulate(0),new Accumulate(n));
-		this.tamfilaCaixa = new Accumulate(0);
-		this.atendidoCaixa = new Accumulate(n);
-		this.filaCaixa = new ArrayList<>();
-		this.tamfilaBebida = new Accumulate(0);
-		this.atendidoBebida = new Accumulate(n);
-		this.filaBebida = new ArrayList<>();
+		hotFood = new Fila(new Accumulate(0),new Accumulate(1));
+		sandes = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa = new Fila[2];
+		caixa[0] = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa[1] = new Fila(new Accumulate(0),new Accumulate(1));
 	}
 	@Override
 	protected void init() {				
-		schedule(new GeraTokens(this),0);
-		schedule(new Stop(this),5400);
+		schedule(new GeraTokens(this),0,1);
+		schedule(new Stop(this),400);
+	}
+}
+//Model a)
+final class Server2 extends Server {
+	final Fila hotFood;
+	final Fila sandes;
+	final Fila[] caixa;
+	final Average delayTime;
+	public Server2() {
+		super();
+		hotFood = new Fila(new Accumulate(0),new Accumulate(1));
+		this.delayTime = new Average();
+		sandes = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa = new Fila[3];
+		caixa[0] = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa[1] = new Fila(new Accumulate(0),new Accumulate(1));
+	}
+	@Override
+	protected void init() {				
+		schedule(new GeraTokens(this),0,);
+		schedule(new Stop(this),400);
+	}
+}
+//Model b)
+final class Server3 extends Server {
+	final Fila hotFood;
+	final Fila sandes;
+	final Fila[] caixa;
+	final Average delayTime;
+	public Server3() {
+		super();
+		hotFood = new Fila(new Accumulate(0),new Accumulate(1));
+		this.delayTime = new Average();
+		sandes = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa = new Fila[2];
+		caixa[0] = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa[1] = new Fila(new Accumulate(0),new Accumulate(1));
 	}
 }
 
+final class Server4 extends Server {
+	final Fila hotFood;
+	final Fila sandes;
+	final Fila[] caixa;
+	final Average delayTime;
+	public Server4() {
+		super();
+		hotFood = new Fila(new Accumulate(0),new Accumulate(1));
+		this.delayTime = new Average();
+		sandes = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa = new Fila[2];
+		caixa[0] = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa[1] = new Fila(new Accumulate(0),new Accumulate(1));
+	}
+
+}
+
+final class Server5 extends Server {
+	final Fila hotFood;
+	final Fila sandes;
+	final Fila[] caixa;
+	final Average delayTime;
+	public Server5() {
+		super();
+		hotFood = new Fila(new Accumulate(0),new Accumulate(1));
+		this.delayTime = new Average();
+		sandes = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa = new Fila[2];
+		caixa[0] = new Fila(new Accumulate(0),new Accumulate(1));
+		caixa[1] = new Fila(new Accumulate(0),new Accumulate(1));
+	}
+
+
+}
 final class Fila{
 	Accumulate tamFila;
 	Accumulate atendido;
